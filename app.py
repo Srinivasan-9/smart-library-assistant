@@ -1,4 +1,17 @@
-import streamlit as st
+import os
+import zipfile
+
+# -------------------------
+# Folder and file setup
+# -------------------------
+project_name = "smart-library-assistant"
+os.makedirs(project_name, exist_ok=True)
+os.makedirs(os.path.join(project_name, ".streamlit"), exist_ok=True)
+
+# 1️⃣ app.py content
+app_py_content = '''import streamlit as st
+st.set_option('browser.gatherUsageStats', False)
+
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
@@ -33,10 +46,8 @@ tfidf, tfidf_matrix = build_model(books)
 def recommend_books(title, num=5):
     title = title.lower()
     matches = books[books["Book-Title"].str.lower().str.contains(title, na=False)]
-
     if matches.empty:
         return pd.DataFrame()
-
     idx = matches.index[0]
     cosine_sim = linear_kernel(tfidf_matrix[idx:idx+1], tfidf_matrix).flatten()
     sim_scores = list(enumerate(cosine_sim))
@@ -46,7 +57,7 @@ def recommend_books(title, num=5):
     return books.iloc[book_indices][["Book-Title", "Book-Author", "Year-Of-Publication", "Image-URL-M"]]
 
 # -------------------------
-# Voice Assistant Functions
+# Voice Assistant
 # -------------------------
 def voice_search():
     r = sr.Recognizer()
@@ -109,7 +120,7 @@ min_year = books["Year-Of-Publication"].min()
 max_year = books["Year-Of-Publication"].max()
 
 st.markdown("<h2 class='section-title'>📊 Dataset Insights</h2>", unsafe_allow_html=True)
-st.info(f"📚 Total Books: {total_books:,}\n\n📅 Years Range: {min_year} ➝ {max_year}")
+st.info(f"📚 Total Books: {total_books:,}\\n\\n📅 Years Range: {min_year} ➝ {max_year}")
 
 # Download dataset as CSV
 st.download_button(
@@ -208,3 +219,32 @@ st.write("""
 # -------------------------
 st.markdown("---")
 st.markdown("© 2025 Smart AI Library | Designed with ❤️", unsafe_allow_html=True)
+'''
+
+with open(os.path.join(project_name, "app.py"), "w", encoding="utf-8") as f:
+    f.write(app_py_content)
+
+# 2️⃣ .streamlit/config.toml
+config_content = '''[server]
+headless = true
+enableCORS = false
+port = 8501
+'''
+
+with open(os.path.join(project_name, ".streamlit/config.toml"), "w", encoding="utf-8") as f:
+    f.write(config_content)
+
+# 3️⃣ requirements.txt
+requirements = '''streamlit
+pandas
+scikit-learn
+speechrecognition
+pyttsx3
+'''
+
+with open(os.path.join(project_name, "requirements.txt"), "w", encoding="utf-8") as f:
+    f.write(requirements)
+
+# -------------------------
+# 4️⃣ Create ZIP
+# -------------------------
