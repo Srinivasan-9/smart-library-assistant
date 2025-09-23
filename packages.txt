@@ -1,0 +1,9 @@
+# For PyAudio to build successfully
+portaudio19-dev
+libasound2-dev
+
+# For pyttsx3 to function at runtime
+espeak
+git add packages.txt
+git commit -m "feat: Add system dependencies for PyAudio"
+git push
